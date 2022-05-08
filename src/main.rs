@@ -23,6 +23,7 @@ fn main() {
     eprintln!("\nDone.");
 }
 
+#[derive(Copy, Clone)]
 struct Vec3 {
     x: f64,
     y: f64,
@@ -157,3 +158,14 @@ impl Vec3 {
 }
 type Color = Vec3;
 type Point3 = Vec3;
+
+struct Ray {
+    origin: Point3,
+    direction: Vec3,
+}
+
+impl Ray {
+    fn at(&self, t: f64) -> Point3 {
+        return self.origin + t * self.direction;
+    }
+}
