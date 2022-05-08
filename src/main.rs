@@ -40,7 +40,7 @@ fn main() {
     //
     for j in (0..image_height).rev() {
         eprintln!("\rScanlines remaining: {j} ");
-        stderr().flush();
+        stderr().flush().expect("Failed to flush somehow");
         for i in 0..image_width {
             let u = i as f64 / (image_width - 1) as f64;
             let v = j as f64 / (image_height - 1) as f64;
@@ -173,7 +173,7 @@ impl Div<f64> for Vec3 {
     type Output = Vec3;
 
     fn div(self, rhs: f64) -> Self::Output {
-        (1 as f64 / rhs) * self
+        (1_f64 / rhs) * self
     }
 }
 
@@ -191,7 +191,7 @@ impl Vec3 {
     }
 
     fn unit_vector(self) -> Vec3 {
-        self / 3 as f64
+        self / 3_f64
     }
 }
 type Color = Vec3;
@@ -213,7 +213,7 @@ struct Ray {
 
 impl Ray {
     fn at(&self, t: f64) -> Point3 {
-        return self.origin + t * self.direction;
+        self.origin + t * self.direction
     }
 
     fn ray_color(self) -> Color {
