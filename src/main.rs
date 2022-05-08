@@ -191,19 +191,31 @@ impl Vec3 {
     }
 
     fn unit_vector(self) -> Vec3 {
-        self / 3_f64
+        self / self.length()
+    }
+
+    fn length(&self) -> f64 {
+        return self.length_squared().sqrt();
+    }
+
+    fn length_squared(&self) -> f64 {
+        return self.x * self.x + self.y * self.y + self.z * self.z;
     }
 }
 type Color = Vec3;
 type Point3 = Vec3;
 
-fn hit_sphere(center: Point3, radius: f64, r: Ray) -> bool {
+fn hit_sphere(center: Point3, radius: f64, r: Ray) -> f64 {
     let oc = r.origin - center;
     let a = Vec3::dot(r.direction, r.direction);
     let b = 2.0 * Vec3::dot(oc, r.direction);
     let c = Vec3::dot(oc, oc) - radius * radius;
     let discriminant = b * b - 4.0 * a * c;
-    discriminant > 0.0
+    if discriminant < 0.0 {
+        -1.0
+    } else {
+        (-b - discriminant.sqrt()) / (2.0 * a)
+    }
 }
 #[derive(Copy, Clone)]
 struct Ray {
@@ -217,7 +229,7 @@ impl Ray {
     }
 
     fn ray_color(self) -> Color {
-        if hit_sphere(
+        let mut t = hit_sphere(
             Vec3 {
                 x: 0.0,
                 y: 0.0,
@@ -225,15 +237,26 @@ impl Ray {
             },
             0.5,
             self,
-        ) {
-            return Vec3 {
-                x: 1.0,
-                y: 0.0,
-                z: 0.0,
-            };
+        );
+        if t > 0.0 {
+            let n = (self.at(t)
+                - Vec3 {
+                    x: 0.0,
+                    y: 0.0,
+                    z: -1.0,
+                })
+            .unit_vector();
+
+            return 0.5
+                * Vec3 {
+                    x: n.x + 1.0,
+                    y: n.y + 1.0,
+                    z: n.z + 1.0,
+                };
         }
+
         let unit_direction = self.direction.unit_vector();
-        let t = 0.5 * (unit_direction.y) + 1.0;
+        t = 0.5 * (unit_direction.y + 1.0);
         (1.0 - t)
             * Vec3 {
                 x: 1.0,
