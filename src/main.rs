@@ -1,7 +1,6 @@
-use std::fmt::{Display, Formatter, Pointer};
-use std::io::{stderr, stdout, Write};
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
-use std::process::Output;
+use std::fmt::{Display, Formatter};
+use std::io::{stderr, Write};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 fn main() {
     // Image
@@ -177,6 +176,17 @@ impl Div<f64> for Vec3 {
     }
 }
 
+impl Neg for Vec3 {
+    type Output = Vec3;
+
+    fn neg(mut self) -> Self::Output {
+        self.x = -self.x;
+        self.y = -self.y;
+        self.z = -self.z;
+        self
+    }
+}
+
 impl Vec3 {
     fn dot(u: Vec3, v: Vec3) -> f64 {
         u.x * v.x + u.y * v.y + u.z * v.z
@@ -195,11 +205,11 @@ impl Vec3 {
     }
 
     fn length(&self) -> f64 {
-        return self.length_squared().sqrt();
+        self.length_squared().sqrt()
     }
 
     fn length_squared(&self) -> f64 {
-        return self.x * self.x + self.y * self.y + self.z * self.z;
+        self.x * self.x + self.y * self.y + self.z * self.z
     }
 }
 type Color = Vec3;
@@ -275,10 +285,22 @@ struct HitRecord {
     p: Point3,
     normal: Vec3,
     t: f64,
+    front_face: bool,
+}
+
+impl HitRecord {
+    fn set_face_normal(&mut self, r: &Ray, outward_normal: Vec3) {
+        self.front_face = Vec3::dot(r.direction, outward_normal) < 0.0;
+        self.normal = if self.front_face {
+            outward_normal
+        } else {
+            -outward_normal
+        }
+    }
 }
 
 trait Hittable {
-    fn hit(&self, r: Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
+    fn hit(&self, _r: Ray, _t_min: f64, _t_max: f64, _rec: &mut HitRecord) -> bool {
         false
     }
 }
@@ -312,8 +334,9 @@ impl Hittable for Sphere {
 
         rec.t = root;
         rec.p = r.at(rec.t);
-        rec.normal = (rec.p - self.center) / self.radius;
+        let outward_normal = (rec.p - self.center) / self.radius;
+        rec.set_face_normal(&r, outward_normal);
 
-        return true;
+        true
     }
 }
