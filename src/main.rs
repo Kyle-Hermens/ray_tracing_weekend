@@ -1,3 +1,4 @@
+use crate::hittable::*;
 use ray::Ray;
 use std::io::{stderr, Write};
 use vec3::{Color, Point3, Vec3};
@@ -12,6 +13,26 @@ fn main() {
     let image_width = 500;
     let image_height = (image_width as f64 / aspect_ratio) as i32;
 
+    let mut world = HittableList { objects: vec![] };
+    world.objects.push(Box::new(Sphere {
+        center: Vec3 {
+            x: 0.0,
+            y: 0.0,
+            z: -1.0,
+        },
+        radius: 0.5,
+    }));
+
+    world.objects.push(Box::new(Sphere {
+        center: Vec3 {
+            x: 0.0,
+            y: -100.5,
+            z: -1.0,
+        },
+        radius: 100.0,
+    }));
+
+    let world: Box<dyn Hittable> = Box::new(world);
     //Camera
     let viewport_height = 2.0;
     let viewport_width = aspect_ratio * viewport_height;
@@ -52,7 +73,7 @@ fn main() {
                 origin,
                 direction: lower_left_corner + u * horizontal + v * vertical - origin,
             };
-            let pixel_color = ray.ray_color();
+            let pixel_color = ray.ray_color_world(&world);
             println!("{pixel_color}");
         }
     }

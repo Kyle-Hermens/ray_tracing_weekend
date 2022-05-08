@@ -1,3 +1,4 @@
+use crate::hittable::{HitRecord, Hittable};
 use crate::{Color, Point3, Vec3};
 
 #[derive(Copy, Clone)]
@@ -9,6 +10,33 @@ pub struct Ray {
 impl Ray {
     pub(crate) fn at(&self, t: f64) -> Point3 {
         self.origin + t * self.direction
+    }
+
+    pub(crate) fn ray_color_world(self, world: &Box<dyn Hittable>) -> Color {
+        let mut rec = HitRecord::default();
+        if world.hit(self, 0.0, f64::INFINITY, &mut rec) {
+            return 0.5
+                * (rec.normal
+                    + Vec3 {
+                        x: 1.0,
+                        y: 1.0,
+                        z: 1.0,
+                    });
+        }
+
+        let unit_direction = self.direction.unit_vector();
+        let t = 0.5 * (unit_direction.y + 1.0);
+        (1.0 - t)
+            * Vec3 {
+                x: 1.0,
+                y: 1.0,
+                z: 1.0,
+            }
+            + t * Vec3 {
+                x: 0.5,
+                y: 0.7,
+                z: 1.0,
+            }
     }
 
     pub(crate) fn ray_color(self) -> Color {

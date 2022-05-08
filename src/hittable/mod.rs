@@ -5,9 +5,9 @@ mod list;
 mod sphere;
 
 #[derive(Copy, Clone, Default)]
-pub(crate) struct HitRecord {
+pub struct HitRecord {
     p: Point3,
-    normal: Vec3,
+    pub(crate) normal: Vec3,
     t: f64,
     front_face: bool,
 }
@@ -23,8 +23,11 @@ impl HitRecord {
     }
 }
 
-pub(crate) trait Hittable {
+pub trait Hittable {
     fn hit(&self, _r: Ray, _t_min: f64, _t_max: f64, _rec: &mut HitRecord) -> bool {
         false
     }
 }
+
+pub use self::list::*;
+pub use self::sphere::*;
