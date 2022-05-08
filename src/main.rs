@@ -197,6 +197,15 @@ impl Vec3 {
 type Color = Vec3;
 type Point3 = Vec3;
 
+fn hit_sphere(center: Point3, radius: f64, r: Ray) -> bool {
+    let oc = r.origin - center;
+    let a = Vec3::dot(r.direction, r.direction);
+    let b = 2.0 * Vec3::dot(oc, r.direction);
+    let c = Vec3::dot(oc, oc) - radius * radius;
+    let discriminant = b * b - 4.0 * a * c;
+    discriminant > 0.0
+}
+#[derive(Copy, Clone)]
 struct Ray {
     origin: Point3,
     direction: Vec3,
@@ -207,7 +216,22 @@ impl Ray {
         return self.origin + t * self.direction;
     }
 
-    fn ray_color(&self) -> Color {
+    fn ray_color(self) -> Color {
+        if hit_sphere(
+            Vec3 {
+                x: 0.0,
+                y: 0.0,
+                z: -1.0,
+            },
+            0.5,
+            self,
+        ) {
+            return Vec3 {
+                x: 1.0,
+                y: 0.0,
+                z: 0.0,
+            };
+        }
         let unit_direction = self.direction.unit_vector();
         let t = 0.5 * (unit_direction.y) + 1.0;
         (1.0 - t)
